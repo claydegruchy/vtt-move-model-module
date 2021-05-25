@@ -1,19 +1,16 @@
 {
-  "name": "module",
-  "title": "New Module",
-  "description": "",
+
+  "name": "vtt-move-model-module",
+  "title": "Overhead video movement",
+  "description": "Moves chracters",
+  "author": "Clay DeGruchy",
+
   "version": "This is auto replaced",
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.7.9",
   "compatibleCoreVersion": "0.7.9",
-  "authors": [
-    {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
-    }
-  ],
+
   "dependencies": [
 
   ],
@@ -21,10 +18,10 @@
     
   ],
   "esmodules": [
-    "/scripts/module.js"
+    "scripts/module.js"
   ],
   "scripts": [
-    "/scripts/lib/lib.js"
+    "scripts/worker.js"
   ],
   "styles": [
     "/styles/module.css"
