@@ -3,22 +3,7 @@ var defaults = {
 }
 
 
-var points = [{
-    x: 384,
-    y: 216
-  }, {
-    x: 484,
-    y: 116
-  }, {
-    x: 284,
-    y: 216
-  },
 
-
-]
-
-
-var last = 0
 
 
 Hooks.once('init', async function() {
@@ -27,25 +12,56 @@ Hooks.once('init', async function() {
     ...defaults
   }
 
-  window.modelMove.update = async function() {
-    var newCoord = points[last]
-    last += 1
-    if (last > 2) last = 0
 
-    // console.log(this.locations);
-    // console.log(this.horVisible);
-    // console.log(this.vertVisible);
+  window.modelMove.translate = function(location, params = {}) {
 
-    for (let [name, location] of Object.entries(this.locations)) {
-      console.log(name, location);
+    var [y, x] = location
+    var inv = n => ((n * 100) - 100) * -1 / 100
+
+    location = {
+      x: inv(x) * Math.abs(this.top.x - this.bottom.x) + (canvas.scene._viewPosition.x - this.horVisible/2),
+      y: inv(y) * Math.abs(this.bottom.y - this.top.y) + (canvas.scene._viewPosition.y - this.vertVisible/2),
+
     }
 
 
-    var token = this.findToken("test")
-    this.moveToken(token, {
-      x: 0,
-      y: 0
-    })
+
+
+    return location
+
+  }
+
+  window.modelMove.update = async function() {
+
+    this.bottom = {
+      x: canvas.scene._viewPosition.x + (this.horVisible / 2),
+      y: canvas.scene._viewPosition.y - (this.vertVisible / 2),
+    }
+
+    this.top = {
+      x: canvas.scene._viewPosition.x - (this.horVisible / 2),
+      y: canvas.scene._viewPosition.y + (this.vertVisible / 2),
+    }
+
+
+    // this.moveToken(this.findToken("player1"), canvas.scene._viewPosition)
+    this.moveToken(this.findToken("bottom"), this.bottom)
+    this.moveToken(this.findToken("top"), this.top)
+
+
+
+
+    for (let [name, location] of Object.entries(this.locations)) {
+      if (["top", "bottom"].includes(name)) continue
+
+      var token = this.findToken(name)
+      this.moveToken(token, this.translate(location))
+
+    }
+
+
+
+
   }
 
   window.modelMove.findToken = function(name) {
@@ -53,9 +69,10 @@ Hooks.once('init', async function() {
   }
 
   window.modelMove.moveToken = function(token, coords) {
+    if (!token) return
     //Compensate for the difference between the center of the token and the top-left of the token, and compensate for token size
-    // coords.x -= token.hitArea.width / 2 + (token.data.width - 1) * canvas.scene.data.grid / 2;
-    // coords.y -= token.hitArea.height / 2 - (token.data.height - 1) * canvas.scene.data.grid / 2;
+    // coords.x -=  (token.data.width - 1) * canvas.scene.data.grid / 2;
+    // coords.y -=  (token.data.height - 1) * canvas.scene.data.grid / 2;
 
     let gridCoords = canvas.grid.getCenter(coords.x - canvas.scene.data.grid / 2, coords.y - canvas.scene.data.grid / 2)
 
@@ -83,10 +100,12 @@ Hooks.once('init', async function() {
 Hooks.once('ready', async function() {
   window.modelMove.horVisible = screen.width / canvas.scene._viewPosition.scale;
   window.modelMove.vertVisible = screen.height / canvas.scene._viewPosition.scale;
+  canvas.scene._viewPosition
 });
 
 
 Hooks.on('canvasPan', async function(canvas, canvasPan) {
   window.modelMove.horVisible = screen.width / canvas.scene._viewPosition.scale;
   window.modelMove.vertVisible = screen.height / canvas.scene._viewPosition.scale;
+
 });
